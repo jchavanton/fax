@@ -1,0 +1,12 @@
+<include>
+  <extension name="public_did">
+     <condition field="${sip_h_X-DISABLE-JB}" expression="^true$" break="never">
+        <action application="answer"/>
+        <anti-action application="answer"/>
+        <action application="set" data="rtcp_audio_interval_msec=5000"/>
+        <anti-action application="set" data="rtcp_audio_interval_msec=5000"/>
+        <action application="echo"/>
+        <anti-action application="echo"/>
+     </condition>
+  </extension>
+</include>
