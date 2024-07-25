@@ -121,6 +121,7 @@ COPY 00_inbound_did.xml /usr/local/freeswitch/conf/dialplan/public/
 COPY hangup_metrics.lua /hangup_metrics.lua
 COPY opus.conf.xml /usr/local/freeswitch/conf/autoload_configs/
 COPY switch.conf.xml.tmpl /usr/local/freeswitch/conf/autoload_configs/
+COPY fax.conf.xml /usr/local/freeswitch/conf/autoload_configs/
 COPY event_socket.conf.xml.tmpl /usr/local/freeswitch/conf/autoload_configs/
 COPY external.xml.tmpl /usr/local/freeswitch/conf/sip_profiles/
 COPY internal.xml.tmpl /usr/local/freeswitch/conf/sip_profiles/

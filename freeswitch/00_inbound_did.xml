@@ -1,12 +1,22 @@
 <include>
-  <extension name="public_did">
-     <condition field="${sip_h_X-DISABLE-JB}" expression="^true$" break="never">
-        <action application="answer"/>
-        <anti-action application="answer"/>
-        <action application="set" data="rtcp_audio_interval_msec=5000"/>
-        <anti-action application="set" data="rtcp_audio_interval_msec=5000"/>
-        <action application="echo"/>
-        <anti-action application="echo"/>
-     </condition>
+  <extension name="test_rxfax_stream">
+  <condition field="destination_number" expression="^fax$">
+    <action application="answer" />
+    <action application="set" data="fax_verbose=true"/>
+    <action application="playback" data="silence_stream://2000"/>
+    <action application="rxfax" data="/files/rxfax.tiff"/>
+    <action application="hangup"/>
+  </condition>
   </extension>
+
+  <extension name="fax_receive">
+  <condition field="destination_number" expression="^2fax$">
+    <action application="answer" />
+    <action application="playback" data="silence_stream://2000"/>
+    <action application="set" data="fax_enable_t38_request=true"/>
+    <action application="set" data="fax_enable_t38=true"/>
+    <action application="rxfax" data="/tmp/FAX-${uuid}.tif"/>
+    <action application="hangup"/>
+  </condition>
+ </extension>
 </include>

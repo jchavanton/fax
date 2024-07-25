@@ -10,19 +10,19 @@ retreive_hct_config() {
 	for i in "${hct_hosts[@]}"
 	do
 		if [ "$1" != "all" ] && [ "$1" != "$i" ] ; then continue; fi
-			if [ "$1" == "HCT_CLIENT" ] ;then
+#			if [ "$1" == "HCT_CLIENT" ] ;then
 				printf "\ndownloading to [$i]\n"
 				scp $i:$INSTALL_DIR/run.sh .
 				scp $i:$INSTALL_DIR/freeswitch/* freeswitch
-			fi
-			if [ "$1" == "HCT_SERVER" ] ;then
-				printf "\ndownloading to [$i]\n"
-				scp $i:$INSTALL_DIR/freeswitch/* freeswitch/
-				scp $i:$INSTALL_DIR/kamailio/* kamailio/
-				scp $i:$INSTALL_DIR/kamailio/config/* kamailio/config
-				scp $i:$INSTALL_DIR/kamailio/sqlite/* kamailio/sqlite
-				scp $i:$INSTALL_DIR/server/* server/
-			fi
+#			fi
+#			if [ "$1" == "HCT_SERVER" ] ;then
+#				printf "\ndownloading to [$i]\n"
+#				scp $i:$INSTALL_DIR/freeswitch/* freeswitch/
+#				scp $i:$INSTALL_DIR/kamailio/* kamailio/
+#				scp $i:$INSTALL_DIR/kamailio/config/* kamailio/config
+#				scp $i:$INSTALL_DIR/kamailio/sqlite/* kamailio/sqlite
+#				scp $i:$INSTALL_DIR/server/* server/
+#			fi
 		done
 }
 
