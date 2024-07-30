@@ -12,12 +12,13 @@ retreive_hct_config() {
 		if [ "$1" != "all" ] && [ "$1" != "$i" ] ; then continue; fi
 			if [ "$1" == "HCT_CLIENT" ] ;then
 				printf "\ndownloading to [$i]\n"
-				scp $i:$INSTALL_DIR/run.sh .
+				scp $i:$INSTALL_DIR/README.md .
 				scp $i:$INSTALL_DIR/freeswitch/* freeswitch
 				scp $i:$INSTALL_DIR/files/* files
 			fi
 			if [ "$1" == "HCT_SERVER" ] ;then
 				printf "\ndownloading to [$i]\n"
+				scp $i:$INSTALL_DIR/README.md .
 				scp $i:$INSTALL_DIR/freeswitch/* freeswitch/
 			fi
 		done
