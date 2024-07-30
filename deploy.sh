@@ -16,11 +16,13 @@ deploy_fax_config() {
 		        && sudo chmod -R 777 ${INSTALL_DIR}"
 		if [ "$1" == "HCT_CLIENT" ] ;then
 			ssh $i "sudo mkdir -p $INSTALL_DIR/files && sudo chmod -R 777 $INSTALL_DIR/files"
+			scp README.md $i:$INSTALL_DIR/
 			scp -r files/* $i:$INSTALL_DIR/files
 			ssh $i "sudo mkdir -p $INSTALL_DIR/freeswitch && sudo chmod -R 777 $INSTALL_DIR/freeswitch"
 			scp -r freeswitch/* $i:$INSTALL_DIR/freeswitch
 		fi
 		if [ "$1" == "HCT_SERVER" ] ;then
+			scp README.md $i:$INSTALL_DIR/
 			ssh $i "sudo mkdir -p $INSTALL_DIR/files && sudo chmod -R 777 $INSTALL_DIR/files"
 			scp -r files/* $i:$INSTALL_DIR/files
 			ssh $i "sudo mkdir -p $INSTALL_DIR/freeswitch && sudo chmod -R 777 $INSTALL_DIR/freeswitch"
