@@ -12,6 +12,11 @@ gs -q -dNOPAUSE -sDEVICE=tiffg4 -sOutputFile=files/tx.tiff files/invoice.pdf -c 
 docker exec freeswitch1 /usr/local/freeswitch/bin/fs_cli -x "originate {absolute_codec_string='PCMU'}sofia/external/fax@15.222.241.45:5062 &txfax(/files/tx.tiff)"
 ```
 
+# RX from HCT_SERVER
+```
+scp HCT_SERVER:/opt/fax/files/rx.tiff ./files/
+```
+
 # TIFF 2 PDF
 ```
 tiff2pdf -o T38_TEST_PAGES_faxed.pdf -p A4 -F rx.tiff
