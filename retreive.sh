@@ -16,14 +16,10 @@ retreive_hct_config() {
 				scp $i:$INSTALL_DIR/freeswitch/* freeswitch
 				scp $i:$INSTALL_DIR/files/* files
 			fi
-#			if [ "$1" == "HCT_SERVER" ] ;then
-#				printf "\ndownloading to [$i]\n"
-#				scp $i:$INSTALL_DIR/freeswitch/* freeswitch/
-#				scp $i:$INSTALL_DIR/kamailio/* kamailio/
-#				scp $i:$INSTALL_DIR/kamailio/config/* kamailio/config
-#				scp $i:$INSTALL_DIR/kamailio/sqlite/* kamailio/sqlite
-#				scp $i:$INSTALL_DIR/server/* server/
-#			fi
+			if [ "$1" == "HCT_SERVER" ] ;then
+				printf "\ndownloading to [$i]\n"
+				scp $i:$INSTALL_DIR/freeswitch/* freeswitch/
+			fi
 		done
 }
 
