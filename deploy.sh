@@ -2,7 +2,7 @@
 
 INSTALL_PREFIX="/opt/"
 
-declare -a hct_hosts=("HCT_CLIENT", "HCT_SERVER")
+declare -a hct_hosts=("HCT_CLIENT" "HCT_SERVER")
 
 deploy_fax_config() {
 	ROLE="fax"
