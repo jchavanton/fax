@@ -3,9 +3,8 @@
 	<param name="use-ecm"		value="true"/>
 	<param name="verbose"		value="true"/>
 	<param name="disable-v17"	value="false"/>
-	<param name="ident"		value="SpanDSP Fax Ident"/>
-	<param name="header"		value="SpanDSP Fax Header"/>
-
+	<param name="ident"		value="HCT server Fax Ident"/>
+	<param name="header"		value="HCT server Fax Header"/>
 	<param name="spool-dir"		value="$${temp_dir}"/>
 	<param name="file-prefix"	value="faxrx"/>
     </settings>

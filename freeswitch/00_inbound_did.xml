@@ -4,7 +4,7 @@
     <action application="answer" />
     <action application="set" data="fax_verbose=true"/>
     <action application="playback" data="silence_stream://2000"/>
-    <action application="rxfax" data="/files/rxfax.tiff"/>
+    <action application="rxfax" data="/files/rx.tiff"/>
     <action application="hangup"/>
   </condition>
   </extension>
