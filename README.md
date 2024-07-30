@@ -1,4 +1,4 @@
-## how-to: manual operation
+# HOW-TO: manual operation
 
 ## PDF 2 TIFF
 ```
