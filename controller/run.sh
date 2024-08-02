@@ -14,7 +14,9 @@ docker run -d --net=host \
 	      --env-file ${CONTAINER}.env \
               -v ${HCT_DIR}/client/xml/:/xml \
               -v ${HCT_DIR}/client/output/:/output \
+              -v ${DIR_PREFIX}/upload:/go/upload \
               -v ${DIR_PREFIX}/public:/go/public \
+              -v ${DIR_PREFIX}/../files:/files \
               -v /var/run/docker.sock:/var/run/docker.sock \
 	      --restart unless-stopped \
               ${IMAGE}

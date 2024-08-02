@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/exec"
+	"io"
 	"strconv"
 	"strings"
 	"text/template"
@@ -570,6 +572,149 @@ func cmdCreate(s string, cmdQ *[]Cmd,  context string) (string, error) {
 	return cmd.Uuid, nil
 }
 
+// Compile templates on start of the application
+var templates_ui = template.Must(template.ParseFiles("public/upload.html"))
+// Display the named template
+func display_ui(w http.ResponseWriter, page string, data interface{}) {
+        templates_ui.ExecuteTemplate(w, page+".html", data)
+}
+func dockerExecSendFax(fn string) (error) {
+	cli, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		return err
+	}
+	ctx := context.Background()
+	fmt.Printf("docker client created...\n")
+	cli.NegotiateAPIVersion(ctx)
+
+	containers, err := cli.ContainerList(ctx, container.ListOptions{})
+	if err != nil {
+		return err
+	}
+	containerId := ""
+	containerName := ""
+	for _, ctr := range containers {
+		if strings.Contains(ctr.Image, "freeswitch") {
+			containerId = ctr.ID
+			containerName = ctr.Image
+			fmt.Printf("freeswitch container running %s %s\n", containerName, containerId)
+			break
+
+		}
+			fmt.Printf("container running %s %s\n", ctr.ID, ctr.Image)
+	}
+	if containerId == "" {
+		err := errors.New("freeswitch container not running\n")
+		return err
+	}
+	// cmd := []string{"echo", "fs_cli", fn}
+	// cmd := []string{"gs", "-q", "-dNOPAUSE", "-sDEVICE=tiffg4", "-sOutputFile=/files/upload/"+fn+".tiff", "/files/upload/"+fn,"-c","quit"}
+	cmd_gs := exec.Command("gs", "-q", "-dNOPAUSE", "-sDEVICE=tiffg4", "-sOutputFile=/files/upload/"+fn+".tiff", "/files/upload/"+fn,"-c","quit")
+	output, err := cmd_gs.Output()
+	if err != nil {
+		fmt.Println("Error executing command:", err)
+ 		return err
+	}
+	fmt.Println(string(output))
+	// gs -q -dNOPAUSE -sDEVICE=tiffg4 -sOutputFile=/files/upload/tx.tiff /files/upload/invoice.pdf -c quit
+	cmd := []string{"/usr/local/freeswitch/bin/fs_cli","-x", "originate {absolute_codec_string='PCMU'}sofia/external/fax@15.222.241.45:5062 &txfax(/files/upload/"+fn+".tiff)"}
+
+	execConfig := types.ExecConfig{
+		AttachStdout: true,
+		AttachStderr: true,
+		Cmd: cmd,
+	}
+
+	response, err := cli.ContainerExecCreate(ctx, containerId, execConfig)
+	if err != nil {
+		fmt.Printf("error [%s]\n", err.Error())
+		return err
+	}
+	startConfig := types.ExecStartCheck{
+		Detach: false,
+		Tty:    false,
+	}
+	fmt.Printf("ContainerExecCreate [%s] cmd %s\n", containerId, cmd)
+	runnersInc()
+	err = cli.ContainerExecStart(ctx, response.ID, startConfig)
+	if err != nil {
+		fmt.Printf("error [%s]\n", err.Error())
+		runnersDec()
+		return err
+	}
+	fmt.Printf("ContainerExecStart [%s]\n", containerId)
+	execInspect, err := cli.ContainerExecInspect(ctx, response.ID)
+	fmt.Printf("ContainerExecInspect >> pid[%d]running[%t]\n", execInspect.Pid, execInspect.Running)
+	time.Sleep(10 * time.Second)
+	for execInspect.Running {
+		time.Sleep(1000 * time.Millisecond)
+		execInspect, err = cli.ContainerExecInspect(ctx, response.ID)
+		fmt.Printf("ContainerExecInspect >> pid[%d]running[%t]\n", execInspect.Pid, execInspect.Running)
+	}
+	return nil
+}
+func uploadFile(w http.ResponseWriter, r *http.Request) {
+        // Maximum upload of 16 MB files
+        r.ParseMultipartForm(16 << 20)
+
+        var fileName string
+        for k, v := range r.MultipartForm.File{
+                fileName = k
+                fmt.Println(k)
+                fmt.Println(v)
+                break
+        }
+
+        // Get handler for filename, size and headers
+        file, handler, err := r.FormFile(fileName)
+        if err != nil {
+                fmt.Println("Error Retrieving the File")
+                fmt.Println(err)
+                return
+        }
+
+        defer file.Close()
+        // fmt.Printf("Uploaded File: %+v\n", handler.Filename)
+        // fmt.Printf("File Size: %+v\n", handler.Size)
+        // fmt.Printf("MIME Header: %+v\n", handler.Header)
+
+        // Create file
+        dst, err := os.Create("/files/upload/" + handler.Filename)
+        defer dst.Close()
+        if err != nil {
+                http.Error(w, err.Error(), http.StatusInternalServerError)
+                return
+        }
+
+        // Copy the uploaded file to the created file on the filesystem
+        if _, err := io.Copy(dst, file); err != nil {
+                http.Error(w, err.Error(), http.StatusInternalServerError)
+                return
+        }
+
+        fmt.Printf("Successfully Uploaded File [%s] size[%d]\n", handler.Filename, handler.Size)
+        fmt.Fprintf(w, "Successfully Uploaded File [%s] size[%d]\n", handler.Filename, handler.Size)
+	err = dockerExecSendFax(handler.Filename)
+        if err != nil {
+                http.Error(w, err.Error(), http.StatusInternalServerError)
+                return
+        }
+}
+
+
+func uploadHandler(w http.ResponseWriter, r *http.Request) {
+        ua := r.Header.Get("User-Agent")
+        m := "upload"
+        fmt.Printf("[%s] %s...\n", ua, m)
+
+        switch r.Method {
+        case "GET":
+                display_ui(w, "upload", nil)
+        case "POST":
+                uploadFile(w, r)
+        }
+}
+
 func cmdExec(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	s := r.FormValue("cmd")
@@ -910,7 +1055,7 @@ func main() {
 	go rmqSubscribe(&cmdQ, os.Getenv("RMQ_SUB_Q_PROVIDER"));
 
 	maxCalls = 20
-	if len(os.Args) < 4 {
+	if len(os.Args) < 2 {
 		fmt.Printf("Missing argument %d\n", len(os.Args))
 		return
 	}
@@ -919,13 +1064,12 @@ func main() {
 		fmt.Printf("Invalid argument port %s\n", os.Args[1])
 		return
 	}
-	cert := os.Args[2]
-	key := os.Args[3]
-	fmt.Printf("cert[%s] key[%s]\n", cert, key)
 
 	// Upload route
 	http.HandleFunc("/cmd", cmdHandler)
 	http.HandleFunc("/res", resHandler)
+        http.HandleFunc("/upload", uploadHandler)
+
 	// http.HandleFunc("/download", downloadHandler)
 
 	go cmdRunner()

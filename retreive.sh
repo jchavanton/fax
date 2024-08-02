@@ -14,6 +14,7 @@ retreive_hct_config() {
 				printf "\ndownloading to [$i]\n"
 				scp $i:$INSTALL_DIR/README.md .
 				scp $i:$INSTALL_DIR/freeswitch/* freeswitch
+				scp $i:$INSTALL_DIR/controller/* controller
 				scp $i:$INSTALL_DIR/files/* files
 			fi
 			if [ "$1" == "HCT_SERVER" ] ;then

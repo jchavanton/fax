@@ -1,10 +1,8 @@
 #!/bin/bash
 
 if [ "$1" = "" ]; then
-	PORT=8080
-	CERT="/tls/fullchain.cer"
-	KEY="/tls/pbx.mango.band.key"
-	CMD="/main/main ${PORT} ${CERT} ${KEY}"
+	PORT=8090
+	CMD="/main/main ${PORT}"
 else
         CMD="$*"
 fi

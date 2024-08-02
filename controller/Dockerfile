@@ -16,8 +16,10 @@ COPY sip_client.go /main/
 COPY rabbitmq_client.go /main/
 
 RUN ls /main/
-RUN echo "building hct controller" \
+RUN echo "building fax controller" \
  && cd /main && go build
+
+RUN apt-get update && apt-get install -y ghostscript
 
 COPY entry.sh /
 
